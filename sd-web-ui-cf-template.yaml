@@ -1,6 +1,13 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: A CloudFormation template to deploy a customizable SD webui on EC2
-
+Parameters:
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: String
+    MinLength: "1"
+    MaxLength: "255"
+    AllowedPattern: "[\\x20-\\x7E]*"
+    ConstraintDescription: can contain only ASCII characters.
 Resources:
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -20,6 +27,8 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: g4dn.2xlarge
+      KeyName:
+        Ref: KeyName
       ImageId: ami-0574da719dca65348
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
@@ -33,7 +42,7 @@ Resources:
         "Fn::Base64": |
           #!/bin/bash
           cd /home/ubuntu
-          git clone https://github.com/bbaaxx/customizable-sd-webui-ec2.git
+          git clone https://github.com/bbaaxx/customizable-sd-webui-ec2.git stable-diffusion-webui
           bash stable-diffusion-webui/setup.sh -y
   MyEIP:
     Type: AWS::EC2::EIP
@@ -47,34 +56,34 @@ Outputs:
   InstanceId:
     Description: InstanceId of the newly created EC2 instance
     Value:
-      Ref: Ec2Instance
+      Ref: EC2Instance
   AZ:
     Description: Availability Zone of the newly created EC2 instance
     Value:
       Fn::GetAtt:
-        - Ec2Instance
+        - EC2Instance
         - AvailabilityZone
   PublicIP:
     Description: Public IP address of the newly created EC2 instance
     Value:
       Fn::GetAtt:
-        - Ec2Instance
+        - EC2Instance
         - PublicIp
   PrivateIP:
     Description: Private IP address of the newly created EC2 instance
     Value:
       Fn::GetAtt:
-        - Ec2Instance
+        - EC2Instance
         - PrivateIp
   PublicDNS:
     Description: Public DNSName of the newly created EC2 instance
     Value:
       Fn::GetAtt:
-        - Ec2Instance
+        - EC2Instance
         - PublicDnsName
   PrivateDNS:
     Description: Private DNSName of the newly created EC2 instance
     Value:
       Fn::GetAtt:
-        - Ec2Instance
+        - EC2Instance
         - PrivateDnsName
